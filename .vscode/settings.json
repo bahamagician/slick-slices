@@ -29,5 +29,10 @@
   ],
   "emmet.includeLanguages": {
     "javascript": "javascriptreact"
+  },
+  "launch": {
+  
+    "configurations": [],
+    "compounds": []
   }
 }
