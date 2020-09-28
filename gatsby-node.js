@@ -1,4 +1,5 @@
 import path from 'path';
+import fetch from 'isomorphic-fetch';
 
 async function turnPizzasIntoPages({ graphql, actions }) {
   // 1. Get a template for this page
@@ -50,6 +51,66 @@ async function turnToppingsIntoPages({ graphql, actions }) {
       },
     });
   });
+}
+
+async function fetchBeersAndTurnIntoNodes({
+  actions,
+  createNodeId,
+  createContentDigest,
+}) {
+  const res = await fetch('https://sampleapis.com/beers/api/ale');
+  const beers = await res.json();
+  for (const beer of beers) {
+    const nodeMeta = {
+      id: createNodeId(`beer-${beer.name}`),
+      parent: null,
+      children: [],
+      internal: {
+        type: 'Beer',
+        mediaType: 'application/json',
+        contentDigest: createContentDigest(beer),
+      },
+    };
+    actions.createNode({
+      ...beer,
+      ...nodeMeta,
+    });
+  }
+}
+
+async function fetchDocsAndTurnIntoNodes({
+  actions,
+  createNodeId,
+  createContentDigest,
+}) {
+  const res = await fetch('https://website-api.doctorshosp.com/doctors');
+  const data = await res.json();
+  const doctors = data.data.flat();
+
+  for (const doctor of doctors) {
+    const nodeMeta = {
+      id: createNodeId(`doctor-${doctor.name}`),
+      parent: null,
+      children: [],
+      internal: {
+        type: 'doctor',
+        mediaType: 'application/json',
+        contentDigest: createContentDigest(doctor),
+      },
+    };
+    actions.createNode({
+      ...doctors,
+      ...nodeMeta,
+    });
+  }
+}
+
+export async function sourceNodes(params) {
+  // fetch a list of stuff
+  await Promise.all([
+    fetchBeersAndTurnIntoNodes(params),
+    fetchDocsAndTurnIntoNodes(params),
+  ]);
 }
 
 export async function createPages(params) {
