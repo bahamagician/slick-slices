@@ -31,7 +31,6 @@ function countPizzasInToppings(pizzas) {
     .flat()
     .reduce((acc, topping) => {
       const existingTopping = acc[topping.id];
-      console.log(existingTopping);
       if (existingTopping) {
         existingTopping.count += 1;
       } else {
@@ -73,7 +72,6 @@ export default function ToppingsFilter() {
     }
   `);
   const toppingsWithCounts = countPizzasInToppings(pizzas.nodes);
-  console.log(toppingsWithCounts);
   return (
     <ToppingsStyles>
       {toppingsWithCounts.map((topping) => (
