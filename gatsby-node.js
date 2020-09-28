@@ -28,10 +28,28 @@ async function turnPizzasIntoPages({ graphql, actions }) {
   });
 }
 
+async function turnToppingsIntoPages({ graphql, actions }) {
+  const toppingTemplate = path.resolve('./src/pages/pizzas.js');
+  const { data } = await graphql(`
+    query {
+      toppings: allSanityTopping {
+        nodes {
+          name
+          id
+        }
+      }
+    }
+  `);
+  console.log(data);
+}
+
 export async function createPages(params) {
   // Create pages dynamically
+  await Promise.all([
+    turnPizzasIntoPages(params),
+    turnToppingsIntoPages(params),
+  ]);
   // 1. Pizzas
-  await turnPizzasIntoPages(params);
   // 2. Toppings
   // 3. Slicemasters
 }
