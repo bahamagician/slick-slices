@@ -40,7 +40,16 @@ async function turnToppingsIntoPages({ graphql, actions }) {
       }
     }
   `);
-  console.log(data);
+  data.toppings.nodes.forEach((topping) => {
+    actions.createPage({
+      path: `topping/${topping.name}`,
+      component: toppingTemplate,
+      context: {
+        topping: topping.name,
+        // TODO REGEX for topping
+      },
+    });
+  });
 }
 
 export async function createPages(params) {
