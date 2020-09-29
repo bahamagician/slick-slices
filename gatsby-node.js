@@ -71,10 +71,8 @@ async function fetchBeersAndTurnIntoNodes({
         contentDigest: createContentDigest(beer),
       },
     };
-    actions.createNode({
-      ...beer,
-      ...nodeMeta,
-    });
+    const node = { ...beer, ...nodeMeta };
+    actions.createNode(node);
   }
 }
 
@@ -83,25 +81,27 @@ async function fetchDocsAndTurnIntoNodes({
   createNodeId,
   createContentDigest,
 }) {
-  const res = await fetch('https://website-api.doctorshosp.com/doctors');
+  const res = await fetch(
+    'https://website-api.doctorshosp.com/doctors?include=specialities'
+  );
   const data = await res.json();
-  const doctors = data.data.flat();
+  const doctors = data.data;
 
   for (const doctor of doctors) {
     const nodeMeta = {
-      id: createNodeId(`doctor-${doctor.name}`),
+      id: createNodeId(`Doctor-${doctor.id}`),
+      phones: ['', [], ['']].indexOf(doctor.phones) + 1 ? null : doctor.phones,
       parent: null,
       children: [],
       internal: {
-        type: 'doctor',
+        type: 'Doctor',
         mediaType: 'application/json',
         contentDigest: createContentDigest(doctor),
       },
     };
-    actions.createNode({
-      ...doctors,
-      ...nodeMeta,
-    });
+
+    const node = { ...doctor, ...nodeMeta };
+    actions.createNode(node);
   }
 }
 
