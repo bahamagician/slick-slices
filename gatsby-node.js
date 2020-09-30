@@ -75,17 +75,31 @@ async function fetchBeersAndTurnIntoNodes({
     actions.createNode(node);
   }
 }
+const allItems = [];
+async function fetchItems(endpoint, currentPage = 0) {
+  const res = await fetch(`${endpoint}&page=${currentPage}`);
+  const page = await res.json();
+  console.log(page.links.next);
+  // push the items into the page
+  allItems.push(...page.data);
+  // Now if there are more pages, we need to call this function again
+  if (page.links.next) {
+    return fetchItems(endpoint, page.meta.current_page + 1);
+  }
+  // otherwise resolve it
+  return allItems;
+}
 
-async function fetchDocsAndTurnIntoNodes({
+async function fetchAllDocsAndTurnIntoNodes({
   actions,
   createNodeId,
   createContentDigest,
 }) {
-  const res = await fetch(
+  const doctors = await fetchItems(
     'https://website-api.doctorshosp.com/doctors?include=specialities'
   );
-  const data = await res.json();
-  const doctors = data.data;
+  console.log(doctors);
+  // const doctors = data.data;
 
   for (const doctor of doctors) {
     const nodeMeta = {
@@ -104,6 +118,35 @@ async function fetchDocsAndTurnIntoNodes({
     actions.createNode(node);
   }
 }
+
+// async function fetchDocsAndTurnIntoNodes({
+//   actions,
+//   createNodeId,
+//   createContentDigest,
+// }) {
+//   const res = await fetch(
+//     'https://website-api.doctorshosp.com/doctors?include=specialities'
+//   );
+//   const data = await res.json();
+//   const doctors = data.data;
+
+//   for (const doctor of doctors) {
+//     const nodeMeta = {
+//       id: createNodeId(`Doctor-${doctor.id}`),
+//       phones: ['', [], ['']].indexOf(doctor.phones) + 1 ? null : doctor.phones,
+//       parent: null,
+//       children: [],
+//       internal: {
+//         type: 'Doctor',
+//         mediaType: 'application/json',
+//         contentDigest: createContentDigest(doctor),
+//       },
+//     };
+
+//     const node = { ...doctor, ...nodeMeta };
+//     actions.createNode(node);
+//   }
+// }
 async function turnSliceMastersIntoPages({ graphql, actions }) {
   // 1. Query all slicemasters
   const { data } = await graphql(`
@@ -125,12 +168,8 @@ async function turnSliceMastersIntoPages({ graphql, actions }) {
   const pageSize = parseInt(process.env.GATSBY_PAGE_SIZE);
   const pageCount = Math.ceil(data.sliceMasters.totalCount / pageSize);
 
-  console.log(
-    `There are ${data.sliceMasters.totalCount} people. And we have ${pageCount} pages with ${pageSize} per page`
-  );
   // 4. loop through 1 - n and create pages for them
   Array.from({ length: pageCount }).forEach((_, i) => {
-    console.log(`Creating Page ${i}`);
     actions.createPage({
       path: `/slicemasters/${i + 1}`,
       component: path.resolve('./src/pages/slicemasters.js'),
@@ -147,6 +186,7 @@ export async function sourceNodes(params) {
   await Promise.all([
     fetchBeersAndTurnIntoNodes(params),
     fetchDocsAndTurnIntoNodes(params),
+    fetchAllDocsAndTurnIntoNodes(params),
   ]);
 }
 
