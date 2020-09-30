@@ -185,7 +185,6 @@ export async function sourceNodes(params) {
   // fetch a list of stuff
   await Promise.all([
     fetchBeersAndTurnIntoNodes(params),
-    fetchDocsAndTurnIntoNodes(params),
     fetchAllDocsAndTurnIntoNodes(params),
   ]);
 }
