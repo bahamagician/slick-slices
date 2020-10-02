@@ -79,7 +79,6 @@ const allItems = [];
 async function fetchItems(endpoint, currentPage = 0) {
   const res = await fetch(`${endpoint}&page=${currentPage}`);
   const page = await res.json();
-  console.log(page.links.next);
   // push the items into the page
   allItems.push(...page.data);
   // Now if there are more pages, we need to call this function again
@@ -98,7 +97,6 @@ async function fetchAllDocsAndTurnIntoNodes({
   const doctors = await fetchItems(
     'https://website-api.doctorshosp.com/doctors?include=specialities'
   );
-  console.log(doctors);
   // const doctors = data.data;
 
   for (const doctor of doctors) {
