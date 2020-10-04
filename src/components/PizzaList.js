@@ -1,5 +1,5 @@
 import { Link } from 'gatsby';
-import React from 'react';
+import React, { useState } from 'react';
 import Img from 'gatsby-image';
 import styled from 'styled-components';
 
@@ -39,11 +39,21 @@ function SinglePizza({ pizza }) {
 }
 
 export default function PizzaList({ pizzas }) {
+  const [filter, setFilter] = useState('');
   return (
-    <PizzaGridStyles>
-      {pizzas.map((pizza) => (
-        <SinglePizza key={pizza.id} pizza={pizza} />
-      ))}
-    </PizzaGridStyles>
+    <>
+      <input
+        type="text"
+        value={filter}
+        onChange={(e) => setFilter(e.target.value)}
+      />
+      <PizzaGridStyles>
+        {pizzas
+          .filter((pizza) => pizza.name.includes(filter))
+          .map((pizza) => (
+            <SinglePizza key={pizza.id} pizza={pizza} />
+          ))}
+      </PizzaGridStyles>
+    </>
   );
 }
